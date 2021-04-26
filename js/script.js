@@ -2,6 +2,8 @@
 const overview = document.querySelector(".overview");
 // GitHub username
 const username = "ksenia-kos";
+// empty unordered list that will display GitHub repos
+const repoList = document.querySelector(".repo-list");
 
 // fetch GitHub user data
 const getData = async function () {
@@ -28,4 +30,21 @@ const displayUserInfo = function (data) {
         </div>
     `;
     overview.append(userInfoDiv);
+    getRepos();
+};
+
+const getRepos = async function () {
+    const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
+    const reposData = await response.json(); // array
+    console.log(reposData);
+    displayRepos(reposData);
+};
+
+const displayRepos = function (repos) {
+    for (const item of repos) {
+        const li = document.createElement("li");
+        li.classList.add("repo");
+        li.innerHTML = `<h3>${item.name}</h3>`;
+        repoList.append(li);
+    }
 };
