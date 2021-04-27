@@ -8,12 +8,16 @@ const repoList = document.querySelector(".repo-list");
 const reposSec = document.querySelector(".repos");
 // empty section where individual repo information will appear
 const repoDataSec = document.querySelector(".repo-data");
+// "Back to Repo Gallery" button
+const btnViewRepos = document.querySelector(".view-repos");
+// input element "Search by name"
+const inputElem = document.querySelector(".filter-repos");
 
 // fetch GitHub user data
 const getData = async function () {
     const res = await fetch(`https://api.github.com/users/${username}`);
     const data = await res.json(); // object
-    console.log(data);
+    //console.log(data);
     displayUserInfo(data);
 };
 
@@ -40,11 +44,12 @@ const displayUserInfo = function (data) {
 const getRepos = async function () {
     const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
     const reposData = await response.json(); // array
-    console.log(reposData);
+    //console.log(reposData);
     displayRepos(reposData);
 };
 
 const displayRepos = function (repos) {
+    inputElem.classList.remove("hide");
     for (const item of repos) {
         const li = document.createElement("li");
         li.classList.add("repo");
@@ -57,7 +62,7 @@ repoList.addEventListener("click", function (e) {
     // check if the event target (element that was clicked on) matches the h3 element
     if (e.target.matches("h3")) {
         const repoName = e.target.innerText;
-        console.log(repoName);
+        //console.log(repoName);
         getRepo(repoName);
     }
 });
@@ -66,21 +71,22 @@ repoList.addEventListener("click", function (e) {
 const getRepo = async function (repoName) {
     const resp = await fetch(`https://api.github.com/repos/${username}/${repoName}`);
     const repoInfo = await resp.json(); // object
-    console.log(repoInfo);
+    //console.log(repoInfo);
     // Grab languages
     const fetchLanguages = await fetch(repoInfo.languages_url);
     const languageData = await fetchLanguages.json(); // object
-    console.log(languageData);
+    //console.log(languageData);
     
     // Make a list of languages
     const languages = [];
     for (const item in languageData) {
         languages.push(item);
     }
-    console.log(languages);
+    //console.log(languages);
     displayRepoInfo(repoInfo, languages);
 };
 
+// display individual repo
 const displayRepoInfo = function (repoInfo, languages) {
     repoDataSec.innerHTML = "";
     const repoInfoDiv = document.createElement("div");
@@ -94,4 +100,28 @@ const displayRepoInfo = function (repoInfo, languages) {
     repoDataSec.append(repoInfoDiv);
     repoDataSec.classList.remove("hide");
     reposSec.classList.add("hide");
+    btnViewRepos.classList.remove("hide");
 };
+
+// "Back to Repo Gallery" button
+btnViewRepos.addEventListener("click", function () {
+    reposSec.classList.remove("hide");
+    repoDataSec.classList.add("hide");
+    btnViewRepos.classList.add("hide");
+});
+
+// Dynamic search
+inputElem.addEventListener("input", function (e) {
+    const searchInput = e.target.value;
+    const inputLower = searchInput.toLowerCase();
+    const repos = document.querySelectorAll(".repo");
+    
+    for (const repo of repos) {
+        const repoLower = repo.innerText.toLowerCase();
+        if (repoLower.includes(inputLower)) {
+            repo.classList.remove("hide");
+        } else {
+            repo.classList.add("hide");
+        }
+    }
+});
